@@ -62,4 +62,5 @@ enum Type {
   cold_cuts
   snacks
   drinks
+  other
 }
