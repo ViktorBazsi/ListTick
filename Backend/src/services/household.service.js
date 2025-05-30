@@ -21,6 +21,7 @@ const list = async () => {
   const allHouseholds = await prisma.household.findMany({
     include: {
       users: true,
+      goods: true,
     },
   });
   return allHouseholds;
@@ -31,6 +32,7 @@ const getById = async (id) => {
     where: { id },
     include: {
       users: true,
+      goods: true,
     },
   });
   return householdById;

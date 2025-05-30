@@ -29,7 +29,7 @@ model Household {
   name        String
   address     String?
   users       User[]          @relation("Household_User")
-  goods       Good[]          @relation("Good_Household")
+  goods       Good[]          
 }
 
 model Good {
@@ -38,8 +38,10 @@ model Good {
   expiration  String?
   price       Int?
   shop        String?
-  status      Status[]
-  households  Household[]     @relation("Good_Household")
+  status      Status
+  householdId String
+  household   Household       @relation(fields: [householdId], references: [id])
+
 }
 
 enum Status {
