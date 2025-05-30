@@ -33,3 +33,12 @@ export const extractUserIdFromToken = (req, JWT_SECRET) => {
     throw new HttpError("Érvénytelen token", 401);
   }
 };
+
+// HOUSEHOLD
+export const isValidHouseholdId = async (id) => {
+  const household = await prisma.household.findUnique({
+    where: { id },
+  });
+  if (!household) throw new HttpError("household id nem található!", 404);
+  return household;
+};

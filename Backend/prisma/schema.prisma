@@ -26,6 +26,7 @@ model User {
 
 model Household {
   id          String          @id @default(cuid())
+  name        String
   address     String?
   users       User[]          @relation("Household_User")
   goods       Good[]          @relation("Good_Household")

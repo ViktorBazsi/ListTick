@@ -5,6 +5,7 @@ import errorHandler from "./middleware/error-handler.middleware.js";
 import authRoutes from "./routes/auth.routes.js";
 // ROUTES
 import userRoutes from "./routes/user.routes.js";
+import householdRoutes from "./routes/household.routes.js";
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 // ROUTES
 app.use("/api/user", userRoutes);
+app.use("/api/household", householdRoutes);
 
 app.use(errorHandler);
 
