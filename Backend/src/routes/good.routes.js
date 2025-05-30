@@ -13,5 +13,8 @@ router.get("/:id", authMiddleware.authenticate, goodController.getById);
 router.put("/:id", authMiddleware.authenticate, goodController.update);
 // DELETE
 router.delete("/:id", authMiddleware.authenticate, goodController.destroy);
+// EXTRA
+router.get("/by-household/:householdId", authMiddleware.authenticate, goodController.listByHousehold);
+
 
 export default router;

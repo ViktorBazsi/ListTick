@@ -1,5 +1,6 @@
 import prisma from "../models/prisma-client.js";
 import HttpError from "../utils/HttpError.js";
+import { isValidHouseholdId } from "../utils/validtaion.utils.js";
 
 const create = async ({
   name,
@@ -14,13 +15,6 @@ const create = async ({
     where: { id: householdId },
     include: { users: true },
   });
-
-  console.log("User ID:", userId);
-  console.log("Household ID:", householdId);
-  console.log(
-    "Household users:",
-    household.users.map((u) => u.id)
-  );
 
   if (!household) {
     throw new HttpError("Household nem található", 404);
@@ -116,10 +110,22 @@ const destroy = async (id, userId) => {
   return deletedGood;
 };
 
+// EXTRA
+const listByHouseholdId = async (householdId) => {
+  await isValidHouseholdId(householdId);
+  const goods = await prisma.good.findMany({
+    where: { householdId },
+    orderBy: { name: "asc" }, // ha akarod, rendezve is jöhet
+  });
+
+  return goods;
+};
+
 export default {
   create,
   list,
   getById,
   update,
   destroy,
+  listByHouseholdId,
 };

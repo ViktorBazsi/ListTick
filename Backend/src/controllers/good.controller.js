@@ -1,7 +1,5 @@
 import goodService from "../services/good.service.js";
-import { JWT_SECRET } from "../constants/constants.js";
-import HttpError from "../utils/HttpError.js";
-import { extractUserIdFromToken } from "../utils/validtaion.utils.js";
+
 
 const create = async (req, res, next) => {
   const { name, expiration, price, shop, householdId, status } = req.body;
@@ -71,10 +69,23 @@ const destroy = async (req, res, next) => {
   }
 };
 
+// EXTRA
+const listByHousehold = async (req, res, next) => {
+  const { householdId } = req.params;
+
+  try {
+    const goods = await goodService.listByHouseholdId(householdId);
+    res.status(200).json(goods);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   create,
   list,
   getById,
   update,
   destroy,
+  listByHousehold,
 };
