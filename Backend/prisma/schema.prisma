@@ -63,4 +63,5 @@ enum Type {
   snacks
   drinks
   other
+  dry
 }

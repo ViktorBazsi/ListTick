@@ -1,6 +1,7 @@
 import prisma from "../models/prisma-client.js";
 import HttpError from "../utils/HttpError.js";
 import { isValidHouseholdId } from "../utils/validtaion.utils.js";
+import goodQueryFilter from "../utils/goodQueryFilter.js";
 
 const create = async ({
   name,
@@ -10,6 +11,7 @@ const create = async ({
   householdId,
   userId,
   status,
+  type,
 }) => {
   const household = await prisma.household.findUnique({
     where: { id: householdId },
@@ -33,15 +35,30 @@ const create = async ({
       shop,
       householdId,
       status,
+      type,
     },
   });
 
   return newGood;
 };
 
-const list = async () => {
-  const allGoods = await prisma.good.findMany();
-  return allGoods;
+// const list = async () => {
+//   const allGoods = await prisma.good.findMany();
+//   return allGoods;
+// };
+
+const list = async (query) => {
+  const prismaQuery = goodQueryFilter(query);
+
+  const total = await prisma.good.count({ where: prismaQuery.where });
+  const goods = await prisma.good.findMany(prismaQuery);
+
+  return {
+    total,
+    page: Number(query.page || 1),
+    pageSize: Number(query.pageSize || 10),
+    goods,
+  };
 };
 
 const getById = async (id) => {
@@ -111,14 +128,31 @@ const destroy = async (id, userId) => {
 };
 
 // EXTRA
-const listByHouseholdId = async (householdId) => {
-  await isValidHouseholdId(householdId);
-  const goods = await prisma.good.findMany({
-    where: { householdId },
-    orderBy: { name: "asc" }, // ha akarod, rendezve is jöhet
-  });
+// const listByHouseholdId = async (householdId) => {
+//   await isValidHouseholdId(householdId);
+//   const goods = await prisma.good.findMany({
+//     where: { householdId },
+//     orderBy: { name: "asc" }, // ha akarod, rendezve is jöhet
+//   });
 
-  return goods;
+//   return goods;
+// };
+
+const listByHouseholdId = async (householdId, query = {}) => {
+  await isValidHouseholdId(householdId);
+
+  // hozzáadjuk a householdId-t a query-hez
+  const prismaQuery = goodQueryFilter({ ...query, householdId });
+
+  const total = await prisma.good.count({ where: prismaQuery.where });
+  const goods = await prisma.good.findMany(prismaQuery);
+
+  return {
+    total,
+    page: Number(query.page || 1),
+    pageSize: Number(query.pageSize || 10),
+    goods,
+  };
 };
 
 export default {

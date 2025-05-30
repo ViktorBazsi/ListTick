@@ -1,8 +1,7 @@
 import goodService from "../services/good.service.js";
 
-
 const create = async (req, res, next) => {
-  const { name, expiration, price, shop, householdId, status } = req.body;
+  const { name, expiration, price, shop, householdId, status, type } = req.body;
   const userId = req.user?.id;
 
   try {
@@ -14,6 +13,7 @@ const create = async (req, res, next) => {
       householdId,
       userId,
       status,
+      type,
     });
     res.status(201).json(newGood);
   } catch (error) {
@@ -23,7 +23,7 @@ const create = async (req, res, next) => {
 
 const list = async (req, res, next) => {
   try {
-    const allGoods = await goodService.list();
+    const allGoods = await goodService.list(req.query);
     res.status(200).json(allGoods);
   } catch (error) {
     next(error);
@@ -42,13 +42,13 @@ const getById = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   const { id } = req.params;
-  const { name, expiration, price, shop, status } = req.body;
+  const { name, expiration, price, shop, status, type } = req.body;
   const userId = req.user?.id;
 
   try {
     const updatedGood = await goodService.update(
       id,
-      { name, expiration, price, shop, status },
+      { name, expiration, price, shop, status, type },
       userId
     );
     res.status(201).json(updatedGood);
@@ -74,7 +74,7 @@ const listByHousehold = async (req, res, next) => {
   const { householdId } = req.params;
 
   try {
-    const goods = await goodService.listByHouseholdId(householdId);
+    const goods = await goodService.listByHouseholdId(householdId, req.query);
     res.status(200).json(goods);
   } catch (error) {
     next(error);
