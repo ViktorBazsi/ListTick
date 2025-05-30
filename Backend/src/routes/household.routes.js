@@ -7,6 +7,11 @@ const router = express.Router();
 // POST
 router.post("/", authMiddleware.authenticate, householdController.create);
 // GET
+router.get(
+  "/my",
+  authMiddleware.authenticate,
+  householdController.getMyHouseholds
+);
 router.get("/", authMiddleware.authenticate, householdController.list);
 router.get("/:id", authMiddleware.authenticate, householdController.getById);
 // PUT

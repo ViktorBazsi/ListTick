@@ -112,6 +112,19 @@ const leave = async (req, res, next) => {
   }
 };
 
+const getMyHouseholds = async (req, res, next) => {
+  const userId = req.user?.id;
+
+  try {
+    const householdsByUserId = await householdService.getHouseholdsByUserId(
+      userId
+    );
+    res.status(200).json(householdsByUserId);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   create,
   list,
@@ -120,4 +133,5 @@ export default {
   destroy,
   join,
   leave,
+  getMyHouseholds,
 };

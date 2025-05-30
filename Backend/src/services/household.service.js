@@ -124,6 +124,18 @@ const isUserInHousehold = async (householdId, userId) => {
   return isMember;
 };
 
+const getHouseholdsByUserId = async (userId) => {
+  return await prisma.household.findMany({
+    where: {
+      users: {
+        some: {
+          id: userId,
+        },
+      },
+    },
+  });
+};
+
 export default {
   create,
   list,
@@ -133,4 +145,5 @@ export default {
   joinHousehold,
   leaveHousehold,
   isUserInHousehold,
+  getHouseholdsByUserId
 };
