@@ -38,6 +38,7 @@ model Good {
   expiration  String?
   price       Int?
   shop        String?
+  type        Type
   status      Status
   householdId String
   household   Household       @relation(fields: [householdId], references: [id])
@@ -50,4 +51,15 @@ enum Status {
   half
   threeQuarter
   full
+}
+
+enum Type {
+  fruit
+  vegetable
+  dairy
+  meat
+  baked
+  cold_cuts
+  snacks
+  drinks
 }
