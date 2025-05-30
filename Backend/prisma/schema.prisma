@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -18,9 +17,10 @@ model User {
   id          String          @id @default(cuid())
   firstName   String?
   lastName    String?
-  userName    String          @unique
+  username    String          @unique
   email       String          @unique
   password    String
+  isAdmin     Boolean         @default(false)
   houseHolds  Household[]     @relation("Household_User")
 }
 
