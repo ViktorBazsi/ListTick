@@ -1,11 +1,16 @@
 import HttpError from "../utils/HttpError.js";
 
-const errorHandler = (err, req, res) => {
-  if (err instanceof HttpError)
-    return res.status(err.status).json({ error: err.message });
-  console.error("Internal Server Error", err);
-  return res.status(500).json({ error: "Internal Server Error" });
-  // return next;
+const errorHandler = (err, req, res, next) => {
+  // Logolás fejlesztéshez
+  console.error("Hiba történt:", err);
+
+  // Alapértelmezett státusz
+  const status = err.status || 500;
+
+  // Ha az Error objektumban van 'message', azt küldjük vissza
+  return res.status(status).json({
+    message: err.message || "Ismeretlen hiba történt",
+  });
 };
 
 export default errorHandler;
