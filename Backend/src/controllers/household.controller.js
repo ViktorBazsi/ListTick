@@ -29,11 +29,21 @@ const list = async (req, res, next) => {
   }
 };
 
+// const getById = async (req, res, next) => {
+//   const { id } = req.params;
+//   try {
+//     const householdById = await householdService.getById(id);
+//     res.status(200).json(householdById);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const getById = async (req, res, next) => {
-  const { id } = req.params;
   try {
-    const householdById = await householdService.getById(id);
-    res.status(200).json(householdById);
+    const userId = req.user?.id; // vagy extractUserIdFromToken(req, JWT_SECRET)
+    const household = await householdService.getById(req.params.id, userId);
+    res.status(200).json(household);
   } catch (error) {
     next(error);
   }

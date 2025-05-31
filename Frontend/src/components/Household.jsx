@@ -55,7 +55,14 @@ export default function Household({ householdId }) {
           ))}
         </ul>
       </div> */}
-      <Goods householdId={householdId} />
+      {/* <Goods householdId={householdId} /> */}
+      <div>
+        {household.goods ? (
+          <Goods householdId={householdId} />
+        ) : (
+          <p className="text-red-600 italic font-semibold">{household.message}</p>
+        )}
+      </div>
     </div>
   );
 }

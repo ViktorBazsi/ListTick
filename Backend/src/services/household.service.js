@@ -50,15 +50,44 @@ const list = async (query = {}) => {
   };
 };
 
-const getById = async (id) => {
-  const householdById = await prisma.household.findUnique({
+// const getById = async (id) => {
+//   const householdById = await prisma.household.findUnique({
+//     where: { id },
+//     include: {
+//       users: true,
+//       goods: true,
+//     },
+//   });
+//   return householdById;
+// };
+
+const getById = async (id, userId) => {
+  const household = await prisma.household.findUnique({
     where: { id },
     include: {
-      users: true,
-      goods: true,
+      users: {
+        select: { id: true, firstName: true, lastName: true, username: true },
+      },
     },
   });
-  return householdById;
+
+  if (!household) throw new HttpError("Háztartás nem található", 404);
+
+  const isMember = household.users.some((user) => user.id === userId);
+
+  if (isMember) {
+    const goods = await prisma.good.findMany({
+      where: { householdId: id },
+    });
+    return { ...household, goods };
+  }
+
+  return {
+    ...household,
+    goods: null,
+    message:
+      "Nem vagy tagja ennek a háztartásnak, ezért nem látod az ide tartozó árukat.",
+  };
 };
 
 const update = async (id, userData) => {
