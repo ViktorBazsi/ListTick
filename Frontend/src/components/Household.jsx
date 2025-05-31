@@ -2,6 +2,7 @@ import { useEffect, useState, useContext, useCallback } from "react";
 import householdService from "../services/household.service";
 import Goods from "./Goods";
 import AuthContext from "../contexts/AuthContext";
+import RequestCard from "./RequestCard";
 
 export default function Household({ householdId }) {
   const [household, setHousehold] = useState(null);
@@ -14,7 +15,7 @@ export default function Household({ householdId }) {
       setHousehold(data);
 
       const isMember = data.users.some((u) => u.id === user.id);
-      const request = data.reqUsers?.find((r) => r.user.id === user.id);
+      const request = data.reqUsers?.find((r) => r.user?.id === user.id);
 
       if (isMember) {
         setJoinStatus("joined");
@@ -91,6 +92,35 @@ export default function Household({ householdId }) {
           ))}
         </ul>
       </div>
+
+      {household.reqUsers?.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold mt-6 mb-2">
+            Csatlakozási kérelmek:
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {household.reqUsers
+              .filter((r) => r.user) // csak akkor map-elünk, ha van user
+              .map((req) => (
+                <RequestCard
+                  key={req.user.id}
+                  user={{ ...req.user, createdAt: req.createdAt }}
+                  householdId={household.id}
+                  onApprove={(approvedUserId) => {
+                    // távolítsuk el a sikeresen jóváhagyott usert a reqUsers-ből
+                    setHousehold((prev) => ({
+                      ...prev,
+                      reqUsers: prev.reqUsers.filter(
+                        (r) => r.user.id !== approvedUserId
+                      ),
+                      users: [...prev.users, req.user], // opcionálisan hozzáadhatod
+                    }));
+                  }}
+                />
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* 📦 Termékek */}
       <div>

@@ -66,7 +66,11 @@ const getById = async (id, userId) => {
     where: { id },
     include: {
       users: true,
-      reqUsers: true,
+      reqUsers: {
+        include: {
+          user: true,
+        },
+      },
     },
   });
 

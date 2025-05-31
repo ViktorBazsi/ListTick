@@ -29,10 +29,18 @@ const joinHousehold = async (householdId) => {
   return response.data;
 };
 
+const approveUser = async (householdId, userId) => {
+  const response = await axiosInstance.put(
+    `/api/household/${householdId}/approve-user/${userId}`
+  );
+  return response.data;
+};
+
 export default {
   getMyHouseholds,
   createHousehold,
   getById,
   getAll,
   joinHousehold,
+  approveUser,
 };
