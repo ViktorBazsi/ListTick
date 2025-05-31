@@ -21,9 +21,18 @@ const getAll = async (page = 1, pageSize = 5, search = "") => {
   });
   return response.data;
 };
+
+const joinHousehold = async (householdId) => {
+  const response = await axiosInstance.put(
+    `/api/household/${householdId}/join`
+  );
+  return response.data;
+};
+
 export default {
   getMyHouseholds,
   createHousehold,
   getById,
   getAll,
+  joinHousehold,
 };

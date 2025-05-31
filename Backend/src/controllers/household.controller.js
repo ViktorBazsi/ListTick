@@ -98,13 +98,42 @@ const destroy = async (req, res, next) => {
 };
 
 // EXTRÁK
+// JOIN egyből, felhasználóként - régi service-t hív meg.
+// const join = async (req, res, next) => {
+//   const { id } = req.params; // householdId
+//   const userId = req.user?.id;
+
+//   try {
+//     const result = await householdService.joinHousehold(id, userId);
+//     res.status(200).json({ message: "Csatlakoztál a householdhoz", result });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const join = async (req, res, next) => {
   const { id } = req.params; // householdId
   const userId = req.user?.id;
 
   try {
-    const result = await householdService.joinHousehold(id, userId);
-    res.status(200).json({ message: "Csatlakoztál a householdhoz", result });
+    const result = await householdService.requestJoinHousehold(id, userId);
+    res.status(200).json({ message: "Csatlakozási kérelem elküldve", result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const approveJoin = async (req, res, next) => {
+  const { id: householdId, userId } = req.params;
+  const approverId = req.user?.id;
+
+  try {
+    const result = await householdService.approveJoinRequest(
+      householdId,
+      userId,
+      approverId
+    );
+    res.status(200).json({ message: "Felhasználó jóváhagyva", result });
   } catch (error) {
     next(error);
   }
@@ -144,4 +173,5 @@ export default {
   join,
   leave,
   getMyHouseholds,
+  approveJoin,
 };

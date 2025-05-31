@@ -43,7 +43,7 @@ model HouseholdJoinRequest {
   user          User       @relation(fields: [userId], references: [id])
   household     Household  @relation(fields: [householdId], references: [id])
 
-  @@unique([userId, householdId]) // egy user csak egyszer kérhet csatlakozást adott háztartáshoz
+  @@unique([userId, householdId], name: "userId_householdId") // egy user csak egyszer kérhet csatlakozást adott háztartáshoz
 }
 
 model Good {

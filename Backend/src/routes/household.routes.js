@@ -25,5 +25,10 @@ router.put(
   authMiddleware.authenticate,
   householdController.leave
 );
+router.put(
+  "/:id/approve-user/:userId",
+  authMiddleware.authenticate,
+  householdController.approveJoin
+);
 
 export default router;

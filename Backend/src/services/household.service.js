@@ -65,9 +65,8 @@ const getById = async (id, userId) => {
   const household = await prisma.household.findUnique({
     where: { id },
     include: {
-      users: {
-        select: { id: true, firstName: true, lastName: true, username: true },
-      },
+      users: true,
+      reqUsers: true,
     },
   });
 
@@ -188,6 +187,94 @@ const getHouseholdsByUserId = async (userId) => {
   });
 };
 
+const requestJoinHousehold = async (householdId, userId) => {
+  const household = await prisma.household.findUnique({
+    where: { id: householdId },
+    include: {
+      users: true,
+      reqUsers: {
+        where: { userId },
+      },
+    },
+  });
+
+  if (!household) {
+    throw new HttpError("Household nem található", 404);
+  }
+
+  const isAlreadyMember = household.users.some((user) => user.id === userId);
+  if (isAlreadyMember) {
+    throw new HttpError("Már tagja vagy ennek a householdnak", 400);
+  }
+
+  const hasRequested = household.reqUsers.length > 0;
+  if (hasRequested) {
+    throw new HttpError("Már beküldtél csatlakozási kérelmet", 400);
+  }
+
+  const joinRequest = await prisma.householdJoinRequest.create({
+    data: {
+      userId,
+      householdId,
+    },
+  });
+
+  return joinRequest;
+};
+
+const approveJoinRequest = async (householdId, userIdToApprove, approverId) => {
+  const household = await prisma.household.findUnique({
+    where: { id: householdId },
+    include: { users: true },
+  });
+
+  if (!household) {
+    throw new HttpError("Household nem található", 404);
+  }
+
+  const isApproverMember = household.users.some(
+    (user) => user.id === approverId
+  );
+  if (!isApproverMember) {
+    throw new HttpError("Csak household tag hagyhat jóvá kérelmet", 403);
+  }
+
+  const request = await prisma.householdJoinRequest.findUnique({
+    where: {
+      userId_householdId: {
+        userId: userIdToApprove,
+        householdId,
+      },
+    },
+  });
+
+  if (!request) {
+    throw new HttpError("Nincs ilyen csatlakozási kérelem", 404);
+  }
+
+  // Csatlakoztatás
+  await prisma.household.update({
+    where: { id: householdId },
+    data: {
+      users: {
+        connect: { id: userIdToApprove },
+      },
+    },
+  });
+
+  // Kérelem törlése
+  await prisma.householdJoinRequest.delete({
+    where: {
+      userId_householdId: {
+        userId: userIdToApprove,
+        householdId,
+      },
+    },
+  });
+
+  return { approvedUserId: userIdToApprove, householdId };
+};
+
 export default {
   create,
   list,
@@ -198,4 +285,6 @@ export default {
   leaveHousehold,
   isUserInHousehold,
   getHouseholdsByUserId,
+  requestJoinHousehold,
+  approveJoinRequest,
 };

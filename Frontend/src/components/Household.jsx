@@ -1,24 +1,50 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext, useCallback } from "react";
 import householdService from "../services/household.service";
 import Goods from "./Goods";
+import AuthContext from "../contexts/AuthContext";
 
 export default function Household({ householdId }) {
   const [household, setHousehold] = useState(null);
+  const [joinStatus, setJoinStatus] = useState("loading"); // "joined" | "requested" | "none"
+  const { user } = useContext(AuthContext); // feltételezve, hogy authUser.id elérhető
+
+  const fetchHousehold = useCallback(async () => {
+    try {
+      const data = await householdService.getById(householdId);
+      setHousehold(data);
+
+      const isMember = data.users.some((u) => u.id === user.id);
+      const request = data.reqUsers?.find((r) => r.user.id === user.id);
+
+      if (isMember) {
+        setJoinStatus("joined");
+      } else if (request) {
+        setJoinStatus({ status: "requested", createdAt: request.createdAt });
+      } else {
+        setJoinStatus("none");
+      }
+    } catch (error) {
+      console.error("Hiba a háztartás betöltésekor:", error);
+    }
+  }, [householdId, user.id]);
 
   useEffect(() => {
-    const fetchHousehold = async () => {
-      try {
-        const data = await householdService.getById(householdId);
-        setHousehold(data);
-      } catch (error) {
-        console.error("Hiba a háztartás betöltésekor:", error);
-      }
-    };
-
     if (householdId) {
       fetchHousehold();
     }
-  }, [householdId]);
+  }, [householdId, fetchHousehold]);
+
+  const handleJoin = async () => {
+    try {
+      await householdService.joinHousehold(householdId);
+      setJoinStatus({
+        status: "requested",
+        createdAt: new Date().toISOString(),
+      }); // optimista frissítés
+    } catch (err) {
+      console.error("Hiba csatlakozás közben:", err);
+    }
+  };
 
   if (!household) return <p>Betöltés...</p>;
 
@@ -29,6 +55,32 @@ export default function Household({ householdId }) {
         <p className="text-gray-600">{household.address}</p>
       )}
 
+      {/* 🔘 Csatlakozás logika */}
+      <div className="mt-4">
+        {joinStatus === "joined" && (
+          <p className="text-green-600 font-semibold">
+            Már tagja vagy ennek a háztartásnak.
+          </p>
+        )}
+
+        {joinStatus?.status === "requested" && (
+          <p className="text-yellow-600">
+            Csatlakozási kérelem elküldve –{" "}
+            {new Date(joinStatus.createdAt).toLocaleString("hu-HU")}
+          </p>
+        )}
+
+        {joinStatus === "none" && (
+          <button
+            onClick={handleJoin}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          >
+            Csatlakozás
+          </button>
+        )}
+      </div>
+
+      {/* 👥 Tagok */}
       <div>
         <h2 className="text-xl font-semibold mt-6 mb-2">Tagok</h2>
         <ul className="list-disc list-inside">
@@ -40,27 +92,14 @@ export default function Household({ householdId }) {
         </ul>
       </div>
 
-      {/* <div>
-        <h2 className="text-xl font-semibold mt-6 mb-2">Termékek</h2>
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {household.goods.map((good) => (
-            <li
-              key={good.id}
-              className="border p-3 rounded-lg bg-white shadow-sm"
-            >
-              <p className="font-medium">{good.name}</p>
-              <p className="text-sm text-gray-500">Típus: {good.type}</p>
-              <p className="text-sm text-gray-500">Állapot: {good.status}</p>
-            </li>
-          ))}
-        </ul>
-      </div> */}
-      {/* <Goods householdId={householdId} /> */}
+      {/* 📦 Termékek */}
       <div>
         {household.goods ? (
           <Goods householdId={householdId} />
         ) : (
-          <p className="text-red-600 italic font-semibold">{household.message}</p>
+          <p className="text-red-600 italic font-semibold">
+            {household.message}
+          </p>
         )}
       </div>
     </div>
