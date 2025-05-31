@@ -15,8 +15,15 @@ const getById = async (id) => {
   return response.data;
 };
 
+const getAll = async (page = 1, pageSize = 5, search = "") => {
+  const response = await axiosInstance.get("/api/household", {
+    params: { page, pageSize, search },
+  });
+  return response.data;
+};
 export default {
   getMyHouseholds,
   createHousehold,
   getById,
+  getAll,
 };

@@ -37,13 +37,22 @@ function Header() {
           <FiUser className="w-6 h-6" />
         </button>
       ) : (
-        <button
-          onClick={handleLogout}
-          className="text-red-600 hover:text-red-800 transition"
-          title="Kijelentkezés"
-        >
-          <FiLogIn className="w-6 h-6" />
-        </button>
+        <div className="flex gap-4 items-center">
+          <button
+            onClick={() => navigate("/households")}
+            className="hover:font-semibold transition"
+          >
+            Összes háztartás
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="text-red-600 hover:text-red-800 transition"
+            title="Kijelentkezés"
+          >
+            <FiLogIn className="w-6 h-6" />
+          </button>
+        </div>
       )}
     </header>
   );

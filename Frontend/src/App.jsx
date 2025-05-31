@@ -14,6 +14,7 @@ import NewHouseholdPage from "./pages/NewHouseholdPage";
 import HouseholdPage from "./pages/HouseholdPage";
 import AddGoodPage from "./pages/AddGoodPage";
 import EditGoodPage from "./pages/EditGoodPage";
+import AllHouseholdsPage from "./pages/AllHousePage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/good/edit/:goodId" element={<EditGoodPage />} />
           <Route path="/good/new" element={<AddGoodPage />} />
           <Route path="/household/new" element={<NewHouseholdPage />} />
+          <Route path="/households" element={<AllHouseholdsPage />} />
           <Route path="/household/:householdId" element={<HouseholdPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />

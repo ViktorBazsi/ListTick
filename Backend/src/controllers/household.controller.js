@@ -22,7 +22,7 @@ const create = async (req, res, next) => {
 
 const list = async (req, res, next) => {
   try {
-    const allHouseholds = await householdService.list();
+    const allHouseholds = await householdService.list(req.query);
     res.status(200).json(allHouseholds);
   } catch (error) {
     next(error);

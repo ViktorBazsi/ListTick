@@ -1,6 +1,7 @@
 import prisma from "../models/prisma-client.js";
 import HttpError from "../utils/HttpError.js";
 import { isValidHouseholdId } from "../utils/validtaion.utils.js";
+import householdQueryFilter from "../utils/householdQueryFilter.js";
 
 const create = async ({ name, address, userId }) => {
   const newHousehold = await prisma.household.create({
@@ -17,14 +18,36 @@ const create = async ({ name, address, userId }) => {
   return newHousehold;
 };
 
-const list = async () => {
-  const allHouseholds = await prisma.household.findMany({
-    include: {
-      users: true,
-      goods: true,
-    },
-  });
-  return allHouseholds;
+// const list = async () => {
+//   const allHouseholds = await prisma.household.findMany({
+//     include: {
+//       users: true,
+//       goods: true,
+//     },
+//   });
+//   return allHouseholds;
+// };
+
+const list = async (query = {}) => {
+  const { skip, take, where } = householdQueryFilter(query);
+
+  const [data, totalCount] = await Promise.all([
+    prisma.household.findMany({
+      skip,
+      take,
+      where,
+      include: {
+        users: true,
+        goods: true,
+      },
+    }),
+    prisma.household.count({ where }), // ugyanazzal a where-rel!
+  ]);
+
+  return {
+    data,
+    totalCount,
+  };
 };
 
 const getById = async (id) => {
@@ -145,5 +168,5 @@ export default {
   joinHousehold,
   leaveHousehold,
   isUserInHousehold,
-  getHouseholdsByUserId
+  getHouseholdsByUserId,
 };
