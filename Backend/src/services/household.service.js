@@ -279,6 +279,46 @@ const approveJoinRequest = async (householdId, userIdToApprove, approverId) => {
   return { approvedUserId: userIdToApprove, householdId };
 };
 
+const rejectJoinRequest = async (householdId, userId, approverId) => {
+  const household = await prisma.household.findUnique({
+    where: { id: householdId },
+    include: { users: true },
+  });
+
+  if (!household) {
+    throw new HttpError("Household nem található", 404);
+  }
+
+  const isApproverMember = household.users.some((u) => u.id === approverId);
+  if (!isApproverMember) {
+    throw new HttpError("Csak household tag utasíthat el kérelmet", 403);
+  }
+
+  const request = await prisma.householdJoinRequest.findUnique({
+    where: {
+      userId_householdId: {
+        userId,
+        householdId,
+      },
+    },
+  });
+
+  if (!request) {
+    throw new HttpError("Nincs ilyen csatlakozási kérelem", 404);
+  }
+
+  await prisma.householdJoinRequest.delete({
+    where: {
+      userId_householdId: {
+        userId,
+        householdId,
+      },
+    },
+  });
+
+  return { rejectedUserId: userId, householdId };
+};
+
 export default {
   create,
   list,
@@ -291,4 +331,5 @@ export default {
   getHouseholdsByUserId,
   requestJoinHousehold,
   approveJoinRequest,
+  rejectJoinRequest,
 };

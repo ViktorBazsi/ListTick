@@ -7,7 +7,7 @@ import RequestCard from "./RequestCard";
 export default function Household({ householdId }) {
   const [household, setHousehold] = useState(null);
   const [joinStatus, setJoinStatus] = useState("loading"); // "joined" | "requested" | "none"
-  const { user } = useContext(AuthContext); // feltételezve, hogy authUser.id elérhető
+  const { user } = useContext(AuthContext);
 
   const fetchHousehold = useCallback(async () => {
     try {
@@ -41,10 +41,30 @@ export default function Household({ householdId }) {
       setJoinStatus({
         status: "requested",
         createdAt: new Date().toISOString(),
-      }); // optimista frissítés
+      });
     } catch (err) {
       console.error("Hiba csatlakozás közben:", err);
     }
+  };
+
+  const handleApprove = (approvedUserId) => {
+    setHousehold((prev) => {
+      const approvedReq = prev.reqUsers.find(
+        (r) => r.user.id === approvedUserId
+      );
+      return {
+        ...prev,
+        reqUsers: prev.reqUsers.filter((r) => r.user.id !== approvedUserId),
+        users: approvedReq ? [...prev.users, approvedReq.user] : prev.users,
+      };
+    });
+  };
+
+  const handleReject = (rejectedUserId) => {
+    setHousehold((prev) => ({
+      ...prev,
+      reqUsers: prev.reqUsers.filter((r) => r.user.id !== rejectedUserId),
+    }));
   };
 
   if (!household) return <p>Betöltés...</p>;
@@ -56,7 +76,6 @@ export default function Household({ householdId }) {
         <p className="text-gray-600">{household.address}</p>
       )}
 
-      {/* 🔘 Csatlakozás logika */}
       <div className="mt-4">
         {joinStatus === "joined" && (
           <p className="text-green-600 font-semibold">
@@ -81,7 +100,6 @@ export default function Household({ householdId }) {
         )}
       </div>
 
-      {/* 👥 Tagok */}
       <div>
         <h2 className="text-xl font-semibold mt-6 mb-2">Tagok</h2>
         <ul className="list-disc list-inside">
@@ -100,29 +118,20 @@ export default function Household({ householdId }) {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {household.reqUsers
-              .filter((r) => r.user) // csak akkor map-elünk, ha van user
+              .filter((r) => r.user)
               .map((req) => (
                 <RequestCard
                   key={req.user.id}
                   user={{ ...req.user, createdAt: req.createdAt }}
                   householdId={household.id}
-                  onApprove={(approvedUserId) => {
-                    // távolítsuk el a sikeresen jóváhagyott usert a reqUsers-ből
-                    setHousehold((prev) => ({
-                      ...prev,
-                      reqUsers: prev.reqUsers.filter(
-                        (r) => r.user.id !== approvedUserId
-                      ),
-                      users: [...prev.users, req.user], // opcionálisan hozzáadhatod
-                    }));
-                  }}
+                  onApprove={handleApprove}
+                  onReject={handleReject}
                 />
               ))}
           </div>
         </div>
       )}
 
-      {/* 📦 Termékek */}
       <div>
         {household.goods ? (
           <Goods householdId={householdId} />

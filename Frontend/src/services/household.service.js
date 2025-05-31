@@ -36,6 +36,13 @@ const approveUser = async (householdId, userId) => {
   return response.data;
 };
 
+const rejectUser = async (householdId, userId) => {
+  const response = await axiosInstance.put(
+    `/api/household/${householdId}/reject-user/${userId}`
+  );
+  return response.data;
+};
+
 export default {
   getMyHouseholds,
   createHousehold,
@@ -43,4 +50,5 @@ export default {
   getAll,
   joinHousehold,
   approveUser,
+  rejectUser,
 };

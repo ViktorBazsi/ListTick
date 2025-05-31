@@ -1,7 +1,12 @@
 import { useState } from "react";
 import householdService from "../services/household.service";
 
-export default function RequestCard({ user, householdId, onApprove }) {
+export default function RequestCard({
+  user,
+  householdId,
+  onApprove,
+  onReject,
+}) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleApprove = async () => {
@@ -11,6 +16,18 @@ export default function RequestCard({ user, householdId, onApprove }) {
       onApprove(user.id); // törlés a listából, vagy újratöltés
     } catch (err) {
       console.error("Hiba a jóváhagyás során:", err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleReject = async () => {
+    setIsProcessing(true);
+    try {
+      await householdService.rejectUser(householdId, user.id);
+      onReject(user.id);
+    } catch (err) {
+      console.error("Hiba elutasítás közben:", err);
     } finally {
       setIsProcessing(false);
     }
@@ -37,8 +54,9 @@ export default function RequestCard({ user, householdId, onApprove }) {
           Jóváhagyás
         </button>
         <button
-          disabled
-          className="px-4 py-1 bg-red-400 text-white text-sm rounded-md cursor-not-allowed"
+          onClick={handleReject}
+          disabled={isProcessing}
+          className="px-4 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition disabled:opacity-50"
         >
           Elutasítás
         </button>

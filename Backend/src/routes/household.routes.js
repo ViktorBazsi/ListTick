@@ -30,5 +30,10 @@ router.put(
   authMiddleware.authenticate,
   householdController.approveJoin
 );
+router.put(
+  "/:id/reject-user/:userId",
+  authMiddleware.authenticate,
+  householdController.rejectJoin
+);
 
 export default router;

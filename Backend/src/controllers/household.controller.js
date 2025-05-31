@@ -139,6 +139,22 @@ const approveJoin = async (req, res, next) => {
   }
 };
 
+const rejectJoin = async (req, res, next) => {
+  const { id: householdId, userId } = req.params;
+  const approverId = req.user?.id; // 🔥 fontos!
+
+  try {
+    const result = await householdService.rejectJoinRequest(
+      householdId,
+      userId,
+      approverId
+    );
+    res.status(200).json({ message: "Kérelem elutasítva", result });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const leave = async (req, res, next) => {
   const { id } = req.params; // householdId
   const userId = req.user?.id;
@@ -174,4 +190,5 @@ export default {
   leave,
   getMyHouseholds,
   approveJoin,
+  rejectJoin,
 };
