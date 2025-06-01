@@ -41,19 +41,26 @@ export default function EditGoodForm({ good }) {
   };
 
   const types = [
-    "fruit",
-    "vegetable",
-    "dairy",
-    "meat",
-    "baked",
-    "cold_cuts",
-    "snacks",
-    "drinks",
-    "other",
-    "dry",
+    { value: "fruit", label: "Gyümölcs" },
+    { value: "vegetable", label: "Zöldség" },
+    { value: "dairy", label: "Tejtermék" },
+    { value: "meat", label: "Hús" },
+    { value: "baked", label: "Péksütemény" },
+    { value: "cold_cuts", label: "Feldolgozott hús" },
+    { value: "snacks", label: "Snack" },
+    { value: "drinks", label: "Ital" },
+    { value: "dry", label: "Szárazáru" },
+    { value: "spice", label: "Fűszer" },
+    { value: "other", label: "Egyéb" },
   ];
 
-  const statuses = ["out", "quarter", "half", "threeQuarter", "full"];
+  const statuses = [
+    { value: "out", label: "Nincs" },
+    { value: "quarter", label: "Negyed" },
+    { value: "half", label: "Fél" },
+    { value: "threeQuarter", label: "Háromnegyed" },
+    { value: "full", label: "Tele" },
+  ];
 
   return (
     <Formik
@@ -83,12 +90,13 @@ export default function EditGoodForm({ good }) {
               className="w-full border rounded px-4 py-2"
             >
               <option value="">Válassz típust</option>
-              {types.map((type) => (
-                <option key={type} value={type}>
-                  {type}
+              {types.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
                 </option>
               ))}
             </Field>
+
             <ErrorMessage
               name="type"
               component="div"
@@ -104,12 +112,13 @@ export default function EditGoodForm({ good }) {
               className="w-full border rounded px-4 py-2"
             >
               <option value="">Válassz állapotot</option>
-              {statuses.map((s) => (
-                <option key={s} value={s}>
-                  {s}
+              {statuses.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
                 </option>
               ))}
             </Field>
+
             <ErrorMessage
               name="status"
               component="div"

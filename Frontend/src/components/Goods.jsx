@@ -95,6 +95,7 @@ export default function Goods({ householdId }) {
           <option value="drinks">Ital</option>
           <option value="dry">Szárazáru</option>
           <option value="other">Egyéb</option>
+          <option value="spice">Fűszer</option>
         </select>
         <button
           onClick={handleSearch}

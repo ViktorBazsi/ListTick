@@ -77,5 +77,6 @@ enum Type {
   snacks
   drinks
   other
+  spice
   dry
 }
