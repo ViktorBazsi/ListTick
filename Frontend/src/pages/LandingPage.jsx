@@ -48,10 +48,17 @@ function LandingPage() {
             onClick={() => navigate("/household/new")}
             className="w-full bg-green-600 text-white rounded-xl px-6 py-3 font-semibold hover:bg-green-700 transition mb-8"
           >
-            Új háztartás létrehozása
+            Háztartás hozzáadása
           </button>
 
           <h2 className="text-2xl font-bold mb-4">Háztartásaid:</h2>
+
+          {/* Figyelmeztetés, ha nincs háztartás */}
+          {households.length === 0 && (
+            <p className="text-gray-600 italic">
+              Még nincs hozzád tartozó háztartás, adj hozzá egyet!
+            </p>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {households.map((household) => (

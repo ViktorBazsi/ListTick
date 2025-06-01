@@ -104,6 +104,11 @@ export default function Goods({ householdId }) {
         </button>
       </div>
 
+      {/* Termékek száma */}
+      <div className="text-center text-sm text-gray-600 mb-5">
+        <span className="font-medium">Termékek száma:</span> {totalCount}
+      </div>
+
       {/* Találatok */}
       {goods.length === 0 ? (
         <p className="text-center text-gray-500 italic mb-6">

@@ -42,7 +42,7 @@ function Header() {
             onClick={() => navigate("/households")}
             className="hover:font-semibold transition"
           >
-            Összes háztartás
+            ListTick háztartások
           </button>
 
           <button

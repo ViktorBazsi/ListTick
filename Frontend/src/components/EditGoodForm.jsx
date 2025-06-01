@@ -162,6 +162,13 @@ export default function EditGoodForm({ good }) {
           >
             Mentés
           </button>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition"
+          >
+            Vissza
+          </button>
         </Form>
       )}
     </Formik>

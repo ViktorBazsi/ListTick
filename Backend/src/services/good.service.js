@@ -128,16 +128,6 @@ const destroy = async (id, userId) => {
 };
 
 // EXTRA
-// const listByHouseholdId = async (householdId) => {
-//   await isValidHouseholdId(householdId);
-//   const goods = await prisma.good.findMany({
-//     where: { householdId },
-//     orderBy: { name: "asc" }, // ha akarod, rendezve is jöhet
-//   });
-
-//   return goods;
-// };
-
 const listByHouseholdId = async (householdId, query = {}) => {
   await isValidHouseholdId(householdId);
 

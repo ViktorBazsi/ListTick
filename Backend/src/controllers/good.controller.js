@@ -70,31 +70,6 @@ const destroy = async (req, res, next) => {
 };
 
 // EXTRA
-// const listByHousehold = async (req, res, next) => {
-//   const { householdId } = req.params;
-
-//   try {
-//     const goods = await goodService.listByHouseholdId(householdId, req.query);
-//     res.status(200).json(goods);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
-// const listByHousehold = async (req, res, next) => {
-//   try {
-//     const filterQuery = {
-//       ...req.query,
-//       householdId: req.params.householdId, // ⬅️ biztosítjuk, hogy a householdId a filter része legyen
-//     };
-
-//     const goods = await goodService.listByHouseholdId(filterQuery);
-//     res.status(200).json(goods);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 const listByHousehold = async (req, res, next) => {
   try {
     const householdId = req.params.householdId;

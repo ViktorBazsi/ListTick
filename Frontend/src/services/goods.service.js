@@ -50,10 +50,16 @@ const getById = async (id) => {
   return response.data;
 };
 
+const deleteGood = async (id) => {
+  const response = await axiosInstance.delete(`/api/good/${id}`);
+  return response.data;
+};
+
 export default {
   getByHousehold,
   createGood,
   updateGood,
   getById,
   getByHouseholdFiltered,
+  deleteGood,
 };
