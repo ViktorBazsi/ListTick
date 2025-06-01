@@ -70,6 +70,11 @@ const deleteHousehold = async (householdId) => {
   return response.data;
 };
 
+const updateHousehold = async (id, values) => {
+  const response = await axiosInstance.put(`/api/household/${id}`, values);
+  return response.data;
+};
+
 export default {
   getMyHouseholds,
   createHousehold,
@@ -80,4 +85,5 @@ export default {
   rejectUser,
   leaveHousehold,
   deleteHousehold,
+  updateHousehold,
 };

@@ -93,6 +93,19 @@ export default function Household({ householdId }) {
         </ul>
       </div>
 
+      {isMember && (
+        <div className="mt-2">
+          <button
+            onClick={() =>
+              (window.location.href = `/household/${household.id}/edit`)
+            }
+            className=" bg-black text-white rounded-xl px-6 py-3 font-semibold hover:bg-gray-800 transition"
+          >
+            Háztartás szerkesztése
+          </button>
+        </div>
+      )}
+
       {isMember && household.reqUsers?.length > 0 && (
         <div>
           <h2 className="text-xl font-semibold mt-6 mb-2">
