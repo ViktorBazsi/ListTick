@@ -71,10 +71,11 @@ const destroy = async (req, res, next) => {
 
 // EXTRA
 const listByHousehold = async (req, res, next) => {
-  const { householdId } = req.params;
-
   try {
-    const goods = await goodService.listByHouseholdId(householdId, req.query);
+    const householdId = req.params.householdId;
+    const filterQuery = req.query;
+
+    const goods = await goodService.listByHouseholdId(householdId, filterQuery); // ✅ külön paraméterként megy át
     res.status(200).json(goods);
   } catch (error) {
     next(error);

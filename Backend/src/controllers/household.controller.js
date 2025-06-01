@@ -20,20 +20,45 @@ const create = async (req, res, next) => {
   }
 };
 
+// const list = async (req, res, next) => {
+//   try {
+//     const allHouseholds = await householdService.list(req.query);
+//     res.status(200).json(allHouseholds);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const list = async (req, res, next) => {
   try {
-    const allHouseholds = await householdService.list();
-    res.status(200).json(allHouseholds);
+    const result = await householdService.list({
+      ...req.query,
+      userId: req.user?.id, // ⬅️ biztosítja a tagsági szűréshez szükséges userId-t
+      onlyMembers: req.query.onlyMembers === "true",
+      onlyNotMembers: req.query.onlyNotMembers === "true",
+    });
+
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
+// const getById = async (req, res, next) => {
+//   const { id } = req.params;
+//   try {
+//     const householdById = await householdService.getById(id);
+//     res.status(200).json(householdById);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const getById = async (req, res, next) => {
-  const { id } = req.params;
   try {
-    const householdById = await householdService.getById(id);
-    res.status(200).json(householdById);
+    const userId = req.user?.id; // vagy extractUserIdFromToken(req, JWT_SECRET)
+    const household = await householdService.getById(req.params.id, userId);
+    res.status(200).json(household);
   } catch (error) {
     next(error);
   }
@@ -70,17 +95,7 @@ const destroy = async (req, res, next) => {
   const userId = req.user?.id;
 
   try {
-    const isMember = await householdService.isUserInHousehold(id, userId);
-    if (!isMember) {
-      return next(
-        new HttpError(
-          "Csak olyan household-ot törölhetsz, amelynek tagja vagy",
-          403
-        )
-      );
-    }
-
-    const deletedHousehold = await householdService.destroy(id);
+    const deletedHousehold = await householdService.destroy(id, userId);
     res.status(200).json({ deletedHousehold });
   } catch (error) {
     next(error);
@@ -88,13 +103,58 @@ const destroy = async (req, res, next) => {
 };
 
 // EXTRÁK
+// JOIN egyből, felhasználóként - régi service-t hív meg.
+// const join = async (req, res, next) => {
+//   const { id } = req.params; // householdId
+//   const userId = req.user?.id;
+
+//   try {
+//     const result = await householdService.joinHousehold(id, userId);
+//     res.status(200).json({ message: "Csatlakoztál a householdhoz", result });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const join = async (req, res, next) => {
   const { id } = req.params; // householdId
   const userId = req.user?.id;
 
   try {
-    const result = await householdService.joinHousehold(id, userId);
-    res.status(200).json({ message: "Csatlakoztál a householdhoz", result });
+    const result = await householdService.requestJoinHousehold(id, userId);
+    res.status(200).json({ message: "Csatlakozási kérelem elküldve", result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const approveJoin = async (req, res, next) => {
+  const { id: householdId, userId } = req.params;
+  const approverId = req.user?.id;
+
+  try {
+    const result = await householdService.approveJoinRequest(
+      householdId,
+      userId,
+      approverId
+    );
+    res.status(200).json({ message: "Felhasználó jóváhagyva", result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const rejectJoin = async (req, res, next) => {
+  const { id: householdId, userId } = req.params;
+  const approverId = req.user?.id; // 🔥 fontos!
+
+  try {
+    const result = await householdService.rejectJoinRequest(
+      householdId,
+      userId,
+      approverId
+    );
+    res.status(200).json({ message: "Kérelem elutasítva", result });
   } catch (error) {
     next(error);
   }
@@ -112,6 +172,19 @@ const leave = async (req, res, next) => {
   }
 };
 
+const getMyHouseholds = async (req, res, next) => {
+  const userId = req.user?.id;
+
+  try {
+    const householdsByUserId = await householdService.getHouseholdsByUserId(
+      userId
+    );
+    res.status(200).json(householdsByUserId);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   create,
   list,
@@ -120,4 +193,7 @@ export default {
   destroy,
   join,
   leave,
+  getMyHouseholds,
+  approveJoin,
+  rejectJoin,
 };
