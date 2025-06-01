@@ -3,11 +3,15 @@ import householdService from "../services/household.service";
 import Goods from "./Goods";
 import AuthContext from "../contexts/AuthContext";
 import RequestCard from "./RequestCard";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ConfirmModal from "./ConfirmModal"; // új modal
 
 export default function Household({ householdId }) {
   const [household, setHousehold] = useState(null);
   const [joinStatus, setJoinStatus] = useState("loading"); // "joined" | "requested" | "none"
   const { user } = useContext(AuthContext);
+  const [confirmData, setConfirmData] = useState(null); // { type: "leave" | "delete", onConfirm: fn }
 
   const fetchHousehold = useCallback(async () => {
     try {
@@ -69,36 +73,14 @@ export default function Household({ householdId }) {
 
   if (!household) return <p>Betöltés...</p>;
 
+  const isMember = joinStatus === "joined";
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">{household.name}</h1>
       {household.address && (
         <p className="text-gray-600">{household.address}</p>
       )}
-
-      <div className="mt-4">
-        {joinStatus === "joined" && (
-          <p className="text-green-600 font-semibold">
-            Már tagja vagy ennek a háztartásnak.
-          </p>
-        )}
-
-        {joinStatus?.status === "requested" && (
-          <p className="text-yellow-600">
-            Csatlakozási kérelem elküldve –{" "}
-            {new Date(joinStatus.createdAt).toLocaleString("hu-HU")}
-          </p>
-        )}
-
-        {joinStatus === "none" && (
-          <button
-            onClick={handleJoin}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          >
-            Csatlakozás
-          </button>
-        )}
-      </div>
 
       <div>
         <h2 className="text-xl font-semibold mt-6 mb-2">Tagok</h2>
@@ -111,7 +93,28 @@ export default function Household({ householdId }) {
         </ul>
       </div>
 
-      {household.reqUsers?.length > 0 && (
+      {/* {household.reqUsers?.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold mt-6 mb-2">
+            Csatlakozási kérelmek:
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {household.reqUsers
+              .filter((r) => r.user)
+              .map((req) => (
+                <RequestCard
+                  key={req.user.id}
+                  user={{ ...req.user, createdAt: req.createdAt }}
+                  householdId={household.id}
+                  onApprove={handleApprove}
+                  onReject={handleReject}
+                />
+              ))}
+          </div>
+        </div>
+      )} */}
+
+      {isMember && household.reqUsers?.length > 0 && (
         <div>
           <h2 className="text-xl font-semibold mt-6 mb-2">
             Csatlakozási kérelmek:
@@ -141,6 +144,91 @@ export default function Household({ householdId }) {
           </p>
         )}
       </div>
+
+      <div className="mt-4 flex flex-col items-center justify-center space-y-4 text-center">
+        {joinStatus === "joined" && (
+          <p className="text-green-600 font-semibold">
+            Már tagja vagy ennek a háztartásnak.
+          </p>
+        )}
+
+        {joinStatus?.status === "requested" && (
+          <p className="text-yellow-600">
+            Csatlakozási kérelem elküldve –{" "}
+            {new Date(joinStatus.createdAt).toLocaleString("hu-HU")}
+          </p>
+        )}
+
+        {joinStatus === "none" && (
+          <button
+            onClick={handleJoin}
+            className="bg-black text-white rounded-xl px-6 py-3 font-semibold hover:bg-gray-800 transition"
+          >
+            Csatlakozás
+          </button>
+        )}
+
+        {joinStatus === "joined" && (
+          <div className="mt-10">
+            <button
+              onClick={() => {
+                const isLastUser =
+                  household.users.length === 1 &&
+                  household.users[0].id === user.id;
+
+                if (isLastUser) {
+                  setConfirmData({
+                    type: "delete",
+                    message:
+                      "Te vagy az utolsó tag. Törölni szeretnéd a háztartást?",
+                    onConfirm: async () => {
+                      try {
+                        await householdService.deleteHousehold(household.id);
+                        toast.success("Háztartás törölve.");
+                        setTimeout(() => {
+                          window.location.href = "/";
+                        }, 1500);
+                      } catch (err) {
+                        console.error("Hiba törléskor:", err);
+                        toast.error("Nem sikerült törölni a háztartást.");
+                      }
+                    },
+                  });
+                } else {
+                  setConfirmData({
+                    type: "leave",
+                    message: "Biztosan elhagyod a háztartást?",
+                    onConfirm: async () => {
+                      try {
+                        await householdService.leaveHousehold(household.id);
+                        toast.success("Sikeresen elhagytad a háztartást.");
+                        setTimeout(() => {
+                          window.location.href = "/";
+                        }, 1500);
+                      } catch (err) {
+                        console.error("Hiba elhagyáskor:", err);
+                        toast.error("Nem sikerült elhagyni a háztartást.");
+                      }
+                    },
+                  });
+                }
+              }}
+              className="bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition"
+            >
+              Háztartás elhagyása
+            </button>
+          </div>
+        )}
+      </div>
+
+      {confirmData && (
+        <ConfirmModal
+          isOpen={!!confirmData}
+          onClose={() => setConfirmData(null)}
+          onConfirm={confirmData.onConfirm}
+          message={confirmData.message}
+        />
+      )}
     </div>
   );
 }

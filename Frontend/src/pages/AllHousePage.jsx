@@ -1,9 +1,10 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import householdService from "../services/household.service";
-import Household from "../components/Household";
+import HouseholdCard from "../components/HouseholdCard";
+import AuthContext from "../contexts/AuthContext";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 10;
 
 export default function AllHouseholdsPage() {
   const [households, setHouseholds] = useState([]);
@@ -13,19 +14,28 @@ export default function AllHouseholdsPage() {
   const [searchTerm, setSearchTerm] = useState(""); // ez kerül a lekérésbe
   const navigate = useNavigate();
 
+  const [onlyMembers, setOnlyMembers] = useState(false);
+  const [onlyNotMembers, setOnlyNotMembers] = useState(false);
+
+  const { user } = useContext(AuthContext);
+
   const fetchData = useCallback(async () => {
     try {
       const { data, totalCount } = await householdService.getAll(
         page,
         PAGE_SIZE,
-        searchTerm
+        searchTerm,
+        {
+          onlyMembers,
+          onlyNotMembers,
+        }
       );
       setHouseholds(data);
       setTotalCount(totalCount);
     } catch (error) {
       console.error("Nem sikerült lekérni a háztartásokat:", error);
     }
-  }, [page, searchTerm]);
+  }, [page, searchTerm, onlyMembers, onlyNotMembers]);
 
   useEffect(() => {
     fetchData();
@@ -62,20 +72,48 @@ export default function AllHouseholdsPage() {
           </button>
         </div>
 
+        {/* ✅ Szűrő checkboxok */}
+        <div className="flex justify-center gap-6 mt-2">
+          <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={onlyMembers}
+              onChange={(e) => {
+                setOnlyMembers(e.target.checked);
+                if (e.target.checked) setOnlyNotMembers(false); // kizárás
+              }}
+            />
+            Csak saját háztartások
+          </label>
+
+          <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={onlyNotMembers}
+              onChange={(e) => {
+                setOnlyNotMembers(e.target.checked);
+                if (e.target.checked) setOnlyMembers(false); // kizárás
+              }}
+            />
+            Csak külsős háztartások
+          </label>
+        </div>
+
         {/* 📋 Lista */}
         {households.length === 0 ? (
           <p className="text-center text-gray-500 mt-4">
             Nincs találat a megadott keresésre.
           </p>
         ) : (
-          households.map((h) => (
-            <div
-              key={h.id}
-              className="border border-gray-200 rounded-xl p-4 shadow-sm bg-gray-50"
-            >
-              <Household householdId={h.id} />
-            </div>
-          ))
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {households.map((h) => (
+              <HouseholdCard
+                key={h.id}
+                household={h}
+                currentUserId={user?.id}
+              />
+            ))}
+          </div>
         )}
 
         {/* 🔁 Lapozás */}

@@ -15,10 +15,25 @@ const getById = async (id) => {
   return response.data;
 };
 
-const getAll = async (page = 1, pageSize = 5, search = "") => {
-  const response = await axiosInstance.get("/api/household", {
-    params: { page, pageSize, search },
-  });
+const getAll = async (page = 1, pageSize = 10, search = "", filters = {}) => {
+  const params = {
+    page,
+    pageSize,
+  };
+
+  if (search.trim()) {
+    params.search = search.trim();
+  }
+
+  if (filters.onlyMembers) {
+    params.onlyMembers = true;
+  }
+
+  if (filters.onlyNotMembers) {
+    params.onlyNotMembers = true;
+  }
+
+  const response = await axiosInstance.get("/api/household", { params });
   return response.data;
 };
 
@@ -43,6 +58,18 @@ const rejectUser = async (householdId, userId) => {
   return response.data;
 };
 
+const leaveHousehold = async (householdId) => {
+  const response = await axiosInstance.put(
+    `/api/household/${householdId}/leave`
+  );
+  return response.data;
+};
+
+const deleteHousehold = async (householdId) => {
+  const response = await axiosInstance.delete(`/api/household/${householdId}`);
+  return response.data;
+};
+
 export default {
   getMyHouseholds,
   createHousehold,
@@ -51,4 +78,6 @@ export default {
   joinHousehold,
   approveUser,
   rejectUser,
+  leaveHousehold,
+  deleteHousehold,
 };

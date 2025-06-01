@@ -37,11 +37,20 @@ const list = async (query = {}) => {
       take,
       where,
       include: {
-        users: true,
+        users: {
+          select: { id: true, firstName: true, lastName: true, username: true },
+        },
         goods: true,
+        reqUsers: {
+          select: {
+            user: {
+              select: { id: true },
+            },
+          },
+        },
       },
     }),
-    prisma.household.count({ where }), // ugyanazzal a where-rel!
+    prisma.household.count({ where }),
   ]);
 
   return {
@@ -49,7 +58,6 @@ const list = async (query = {}) => {
     totalCount,
   };
 };
-
 // const getById = async (id) => {
 //   const householdById = await prisma.household.findUnique({
 //     where: { id },
@@ -102,11 +110,46 @@ const update = async (id, userData) => {
   return updatedHousehold;
 };
 
-const destroy = async (id) => {
+const destroy = async (id, userId) => {
   await isValidHouseholdId(id);
+
+  // Ellenőrizd, hogy az adott user tagja-e
+  const household = await prisma.household.findUnique({
+    where: { id },
+    include: {
+      users: { select: { id: true } },
+    },
+  });
+
+  if (!household) {
+    throw new HttpError("Háztartás nem található", 404);
+  }
+
+  const isMember = household.users.some((user) => user.id === userId);
+  if (!isMember) {
+    throw new HttpError(
+      "Csak olyan háztartást törölhetsz, amelynek tagja vagy",
+      403
+    );
+  }
+
+  if (household.users.length > 1) {
+    throw new HttpError(
+      "A háztartás csak akkor törölhető, ha te vagy az utolsó tag",
+      400
+    );
+  }
+
+  // Töröljük a goods-okat, ha vannak
+  await prisma.good.deleteMany({
+    where: { householdId: id },
+  });
+
+  // Majd a household-ot
   const deletedHousehold = await prisma.household.delete({
     where: { id },
   });
+
   return deletedHousehold;
 };
 

@@ -20,10 +20,25 @@ const create = async (req, res, next) => {
   }
 };
 
+// const list = async (req, res, next) => {
+//   try {
+//     const allHouseholds = await householdService.list(req.query);
+//     res.status(200).json(allHouseholds);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const list = async (req, res, next) => {
   try {
-    const allHouseholds = await householdService.list(req.query);
-    res.status(200).json(allHouseholds);
+    const result = await householdService.list({
+      ...req.query,
+      userId: req.user?.id, // ⬅️ biztosítja a tagsági szűréshez szükséges userId-t
+      onlyMembers: req.query.onlyMembers === "true",
+      onlyNotMembers: req.query.onlyNotMembers === "true",
+    });
+
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
@@ -80,17 +95,7 @@ const destroy = async (req, res, next) => {
   const userId = req.user?.id;
 
   try {
-    const isMember = await householdService.isUserInHousehold(id, userId);
-    if (!isMember) {
-      return next(
-        new HttpError(
-          "Csak olyan household-ot törölhetsz, amelynek tagja vagy",
-          403
-        )
-      );
-    }
-
-    const deletedHousehold = await householdService.destroy(id);
+    const deletedHousehold = await householdService.destroy(id, userId);
     res.status(200).json({ deletedHousehold });
   } catch (error) {
     next(error);
