@@ -93,27 +93,6 @@ export default function Household({ householdId }) {
         </ul>
       </div>
 
-      {/* {household.reqUsers?.length > 0 && (
-        <div>
-          <h2 className="text-xl font-semibold mt-6 mb-2">
-            Csatlakozási kérelmek:
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {household.reqUsers
-              .filter((r) => r.user)
-              .map((req) => (
-                <RequestCard
-                  key={req.user.id}
-                  user={{ ...req.user, createdAt: req.createdAt }}
-                  householdId={household.id}
-                  onApprove={handleApprove}
-                  onReject={handleReject}
-                />
-              ))}
-          </div>
-        </div>
-      )} */}
-
       {isMember && household.reqUsers?.length > 0 && (
         <div>
           <h2 className="text-xl font-semibold mt-6 mb-2">
