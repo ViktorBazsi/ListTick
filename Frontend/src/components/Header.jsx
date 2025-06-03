@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { FiLogIn, FiUser } from "react-icons/fi";
+import { FiLogIn, FiUser, FiShoppingCart } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import AuthContext from "../contexts/AuthContext";
 
@@ -43,6 +43,15 @@ function Header() {
             className="hover:font-semibold transition"
           >
             ListTick háztartások
+          </button>
+
+          <button
+            onClick={() => navigate("/shoppinglist")}
+            className="flex items-center gap-1 hover:font-semibold transition text-gray-700 hover:text-black"
+            title="Bevásárlólista"
+          >
+            <FiShoppingCart className="w-5 h-5" />
+            <span className="hidden sm:inline">Bevásárlólista</span>
           </button>
 
           <button

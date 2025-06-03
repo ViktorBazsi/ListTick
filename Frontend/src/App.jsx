@@ -16,6 +16,7 @@ import AddGoodPage from "./pages/AddGoodPage";
 import EditGoodPage from "./pages/EditGoodPage";
 import AllHouseholdsPage from "./pages/AllHousePage";
 import EditHouseholdPage from "./pages/EditHouseholdPage";
+import ShoppingListPage from "./pages/ShoppingListPages";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/good/new" element={<AddGoodPage />} />
           <Route path="/household/new" element={<NewHouseholdPage />} />
           <Route path="/households" element={<AllHouseholdsPage />} />
+          <Route path="/shoppinglist" element={<ShoppingListPage />} />
           <Route
             path="/household/:householdId/edit"
             element={<EditHouseholdPage />}
